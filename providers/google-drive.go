@@ -3,35 +3,39 @@ package providers
 import (
 	"fmt"
 	"my-backups-synchronizer/utils"
+	"os"
 	"os/exec"
 )
 
 // rclone sync mateus_personal_drive:/ /media/mvalgueiro/Arquivos/archives/google-drive-backup/mateus_personal_drive -P
+
+var GOOGLE_DRIVE_ROOT_PATH string = "google-drive-backup/"
 
 type GoogleDriveProvider struct {
 	rcloneConfigName string
 }
 
 func (g *GoogleDriveProvider) generateFolderPath() string {
-	return ARCHIVE_PATH + "google-drive-backup/" + g.rcloneConfigName + "/"
+	return ARCHIVE_PATH + GOOGLE_DRIVE_ROOT_PATH + g.rcloneConfigName + "/"
 }
 
 func (g *GoogleDriveProvider) doesOutputPathExist() bool {
-	out := utils.DoesFolderExist(g.generateFolderPath())
-	fmt.Println(out)
-	return out
+	return utils.DoesFolderExist(g.generateFolderPath())
 }
 
-func (g *GoogleDriveProvider) createOutputPath() bool {
-	return true
+func (g *GoogleDriveProvider) createOutputPath() error {
+	return os.Mkdir(g.generateFolderPath(), 0750)
 }
 
-func (g *GoogleDriveProvider) checkOutputPath() {
+func (g *GoogleDriveProvider) checkOutputPath() error {
 	fmt.Println("Checking output path...")
 	if g.doesOutputPathExist() {
 		fmt.Println("Path does not exist. Creating it...")
-		g.createOutputPath()
+
+		return g.createOutputPath()
 	}
+
+	return nil
 }
 
 func (g *GoogleDriveProvider) generateRcloneSyncCommand() string {
@@ -44,7 +48,10 @@ func (g *GoogleDriveProvider) runRcloneSyncCommand() error {
 
 func (g *GoogleDriveProvider) sync() error {
 	fmt.Printf("Syncing Google Drive %s\n", g.rcloneConfigName)
-	g.checkOutputPath()
+	if err := g.checkOutputPath(); err != nil {
+		fmt.Println("Could not access output path.")
+		return err
+	}
 
 	return g.runRcloneSyncCommand()
 }
