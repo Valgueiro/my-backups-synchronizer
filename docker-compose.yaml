@@ -3,4 +3,5 @@ services:
     build: .
     volumes:
       - .:/app
+      - ${RCLONE_CONFIG_PATH}:/root/.config/rclone/rclone.conf
     working_dir: /app

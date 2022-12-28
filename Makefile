@@ -1,6 +1,10 @@
-DOCKER_COMPOSE_CMD=docker compose
+RCLONE_CONFIG_PATH=/home/mvalgueiro/.config/rclone/rclone.conf
+DOCKER_COMPOSE_CMD=RCLONE_CONFIG_PATH=$(RCLONE_CONFIG_PATH) docker compose
 
-install:
+build:
+	$(DOCKER_COMPOSE_CMD) build
+
+install: build
 	$(DOCKER_COMPOSE_CMD) run cmd go mod tidy
 
 run:
@@ -8,3 +12,6 @@ run:
 
 test:
 	@$(DOCKER_COMPOSE_CMD) run cmd go test -v ./...
+
+bash:
+	$(DOCKER_COMPOSE_CMD) run cmd bash
