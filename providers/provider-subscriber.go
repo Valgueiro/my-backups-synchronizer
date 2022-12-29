@@ -11,6 +11,8 @@ var SubscribedProviders []Provider = []Provider{
 func Sync() {
 	for _, provider := range SubscribedProviders {
 		err := provider.sync()
-		fmt.Printf("Problem with provider: \n %v", err)
+		if err != nil {
+			fmt.Printf("Problem with provider: \n %v", err)
+		}
 	}
 }
