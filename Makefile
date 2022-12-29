@@ -1,17 +1,28 @@
-RCLONE_CONFIG_PATH=/home/mvalgueiro/.config/rclone/rclone.conf
-DOCKER_COMPOSE_CMD=RCLONE_CONFIG_PATH=$(RCLONE_CONFIG_PATH) docker compose
+RCLONE_CONFIG_PATH=/home/mvalgueiro/.config/rclone/
+ARCHIVE_PATH=/media/mvalgueiro/Arquivos/
+
+
+ENV=RCLONE_CONFIG_PATH=$(RCLONE_CONFIG_PATH) ARCHIVE_PATH=$(ARCHIVE_PATH)
+DOCKER_COMPOSE_CMD=$(ENV) docker compose
+
+
+up:
+	$(DOCKER_COMPOSE_CMD) up -d --build
+
+ps:
+	$(DOCKER_COMPOSE_CMD) ps
 
 build:
-	$(DOCKER_COMPOSE_CMD) build
+	$(DOCKER_COMPOSE_CMD) build --no-cache
 
-install: build
-	$(DOCKER_COMPOSE_CMD) run cmd go mod tidy
+install:
+	$(DOCKER_COMPOSE_CMD) exec cmd go mod tidy
 
 run:
-	@$(DOCKER_COMPOSE_CMD) run cmd go run main.go
+	@$(DOCKER_COMPOSE_CMD) exec cmd go run main.go
 
 test:
-	@$(DOCKER_COMPOSE_CMD) run cmd go test -v ./...
+	$(DOCKER_COMPOSE_CMD) exec cmd go test -v ./...
 
 bash:
-	$(DOCKER_COMPOSE_CMD) run cmd bash
+	$(DOCKER_COMPOSE_CMD) exec cmd bash

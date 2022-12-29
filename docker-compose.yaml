@@ -3,5 +3,9 @@ services:
     build: .
     volumes:
       - .:/app
-      - ${RCLONE_CONFIG_PATH}:/root/.config/rclone/rclone.conf
+      - ${RCLONE_CONFIG_PATH}:/root/.config/rclone/:rw
+      - ${ARCHIVE_PATH}:/archives/
     working_dir: /app
+    environment:
+      - "ARCHIVE_PATH=/archives/"
+    entrypoint: "tail -f /dev/null"

@@ -7,8 +7,6 @@ import (
 	"os/exec"
 )
 
-// rclone sync mateus_personal_drive:/ /media/mvalgueiro/Arquivos/archives/google-drive-backup/mateus_personal_drive -P
-
 var GOOGLE_DRIVE_ROOT_PATH string = "google-drive-backup/"
 
 type GoogleDriveProvider struct {
