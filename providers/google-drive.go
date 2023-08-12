@@ -2,8 +2,7 @@ package providers
 
 import (
 	"fmt"
-	"my-backups-synchronizer/utils"
-	"os"
+	utils "my-backups-synchronizer/utils"
 	"os/exec"
 	"strings"
 )
@@ -14,32 +13,12 @@ type GoogleDriveProvider struct {
 	rcloneConfigName string
 }
 
-func (g *GoogleDriveProvider) generateFolderPath() string {
+func (g *GoogleDriveProvider) generateOutputPath() string {
 	return ARCHIVE_PATH + GOOGLE_DRIVE_ROOT_PATH + g.rcloneConfigName + "/"
 }
 
-func (g *GoogleDriveProvider) doesOutputPathExist() bool {
-	return utils.DoesFolderExist(g.generateFolderPath())
-}
-
-func (g *GoogleDriveProvider) createOutputPath() error {
-	return os.Mkdir(g.generateFolderPath(), 0750)
-}
-
-func (g *GoogleDriveProvider) checkOutputPath() error {
-	fmt.Println("Checking output path...")
-	if g.doesOutputPathExist() {
-		return nil
-	}
-
-	fmt.Printf("Path does not exist %s. Creating it...\n", g.generateFolderPath())
-
-	return g.createOutputPath()
-
-}
-
 func (g *GoogleDriveProvider) generateRcloneSyncCommand() (string, []string) {
-	cmd := fmt.Sprintf("sync %s:/ %s -P", g.rcloneConfigName, g.generateFolderPath())
+	cmd := fmt.Sprintf("sync %s:/ %s -P", g.rcloneConfigName, g.generateOutputPath())
 
 	return "rclone", strings.Split(cmd, " ")
 }
@@ -51,9 +30,15 @@ func (g *GoogleDriveProvider) runRcloneSyncCommand() (output string, err error) 
 }
 
 func (g *GoogleDriveProvider) sync() error {
-	fmt.Printf("Syncing Google Drive %s into %s\n", g.rcloneConfigName, g.generateFolderPath())
-	if err := g.checkOutputPath(); err != nil {
-		fmt.Println("Could not access output path.")
+	fmt.Printf("Syncing Google Drive %s into %s\n", g.rcloneConfigName, g.generateOutputPath())
+
+	outputPath := &utils.Folder{
+		Path:       g.generateOutputPath(),
+		Permission: 0750,
+	}
+
+	if err := outputPath.CheckAndCreateOnFileSystem(); err != nil {
+		fmt.Println("Could not access or create output path.")
 		return err
 	}
 
